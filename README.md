@@ -1,2 +1,2 @@
 # twitter-thread-examine
-gathering data for a scientific paper looking into benefits of threads over singular tweets in sci-com
+This repo will be used to gather data for a scientific paper looking into variations in user engagement between science communication threads and singular tweets.
