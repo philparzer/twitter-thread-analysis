@@ -4,6 +4,6 @@ This repo will be used to gather data for a research paper that looks into varia
 
 ## TODO:
 
-- [] add Tweet / Thread / Both mechanic
-- [] visualization?
-- [] improve UX / make more user friendly / update and add status messages
+- [ ] add Tweet / Thread / Both mechanic
+- [ ] visualization?
+- [ ] improve UX / make more user friendly / update and add status messages
