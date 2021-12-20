@@ -4,4 +4,5 @@ This repo will be used to gather data for a research paper that looks into varia
 
 ## TODO:
 
-- [] use logic if (threadSignifier in tweetText && firstReply == tweetAuthor) => THREAD 
+- [] add Tweet / Thread / Both mechanic
+- [] visualization?
