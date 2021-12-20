@@ -7,6 +7,7 @@ import PySimpleGUI as gui
 gui.theme('SystemDefault')
 
 output_filepath = './'
+start_button_disabled = False
 
 layout = [  
             [gui.Text('Username', size=(10,1)),gui.Input(key='-USERNAME-', size=(45,1), tooltip="enter a twitter username")],
@@ -18,15 +19,20 @@ layout = [
             [gui.ProgressBar(max_value=100, orientation='h', key='progressBar', size=(40, 17))]
         ]      
  
-
 window = gui.Window('Twitter Thread Scraper', layout)
+
+def toggle_start_button():
+    global start_button_disabled
+    start_button_disabled = not start_button_disabled
+    window['Start'].update(disabled = start_button_disabled)
 
 def create_csv(tweets, user, num_of_tweets):
     tweets_panda = pd.DataFrame(tweets, columns=['username', 'content', 'likes'])
     if tweets_panda.empty:
         window['-STATUS-'].update('No tweets found (check for typos in username)', text_color='red')
     else:
-        window['-STATUS-'].update('Success (scraped <= ' + str(num_of_tweets) + ' tweets from @' + user + ')', text_color='green') #TODO: after thread/tweet/both implementation make choice visible in filename
+        #TODO: maybe differentiate between success scraped num_of_tweets and actual scraped num_of_tweets success messages
+        window['-STATUS-'].update('Success (scraped ' + str(len(tweets_panda)) + ' tweets from @' + user + ')', text_color='green') #TODO: after thread/tweet/both implementation make choice visible in filename
         tweets_panda.to_csv(output_filepath + "@" + user.lower() + '-last-' + str(num_of_tweets) + '.csv', sep=',', index = False, encoding='utf-8')
         window['progressBar'].update(100)
 
@@ -61,13 +67,13 @@ def scrape_tweets(user, num_of_tweets):
 
 
     except Exception as e:
-        window['-STATUS-'].update(e, text_color='red')
+        window['-STATUS-'].update(e, text_color='red') #TODO: add information on token error
     
      
 while True:                      
 
     event, values = window.read()
-        
+    
     if event == 'Start':
         
         if values['-OUTPUT_FILEPATH-'] == 'current directory':
@@ -91,8 +97,10 @@ while True:
         
         
         window["-STATUS-"].update("Scraping...", text_color='blue')
+        toggle_start_button()
         scrape_tweets(values['-USERNAME-'], int(values['-NUM_OF_TWEETS-']))
-            
+        toggle_start_button()
+
     if event == gui.WIN_CLOSED or event == 'Exit':
         break
 
