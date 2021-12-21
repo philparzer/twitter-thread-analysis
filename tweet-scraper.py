@@ -11,9 +11,9 @@ start_button_disabled = False
 
 layout = [  
             [gui.Text('Username', size=(10,1)),gui.Input(key='-USERNAME-', size=(45,1), tooltip="enter a twitter username")],
-            [gui.Text('Tweet count', size=(10,1)),gui.Input(key='-NUM_OF_TWEETS-', size=(10,1), tooltip="specify the number of tweets you want to scrape")],
+            [gui.Text('Tweet Count', size=(10,1)),gui.Input(key='-NUM_OF_TWEETS-', size=(10,1), tooltip="n most recent tweets to be scraped")],
             [gui.Text('Output Folder', size=(10,1)),gui.Input('current directory', key='-OUTPUT_FILEPATH-', readonly=True, size=(45,1), tooltip="choose a folder for your .csv output"), gui.FolderBrowse()],
-            [gui.Radio('Threads', 1 , default = True, pad=(1,20), key="-THREADS-"), gui.Radio('Tweets', 1, pad=(1,20), key="-TWEETS-"), gui.Radio('Replies', 1, pad=(1,20), key="-REPLIES-"), gui.Radio('Tweets & Replies', 1, pad=(1,20), key="-TNR-"), gui.Radio('All 4', 1, pad=(1,20), key="-MULTIPLE-")], #TODO: implement this
+            [gui.Radio('Threads', 1 , default = True, pad=(1,20), key="-THREADS-"), gui.Radio('Tweets', 1, pad=(1,20), key="-TWEETS-"), gui.Radio('Replies', 1, pad=(1,20), key="-REPLIES-"), gui.Radio('Threads, Tweets & Replies', 1, pad=(1,20), key="-ALL-")], #TODO: implement this
             [gui.Button('Start')],
             [gui.Text('Status', key='-STATUS-')],
             [gui.ProgressBar(max_value=100, orientation='h', key='progressBar', size=(40, 17))]
@@ -28,42 +28,64 @@ def toggle_start_button():
     window['Start'].update(disabled = start_button_disabled)
 
 
-def create_csv(tweets, user, num_of_tweets, type_of_scrape):#TODO: refactor this function?
+def create_csv(data, user):
 
-    tweets_panda = pd.DataFrame(tweets, columns=['username', 'content', 'likes', 'retweets', 'replies', 'id', 'conversationId', 'inReplyToUser', 'date']) #TODO: think about grouping threads by conversation id
-    
-    #TODO: implement radio logic for different options other than threads here
+    all_panda = pd.DataFrame(data, columns=['username', 'content', 'likes', 'retweets', 'replies', 'id', 'conversationId', 'inReplyToUser', 'date']) #TODO: think about grouping threads by conversation id
 
-    #checking for threads------------------------------------------------------------------------------------------------------------
+    replies = []
+    thread_conv_ids = []
 
     #filtering for double conversationIds
-    threads_panda = tweets_panda.groupby('conversationId').filter(lambda x: len(x) > 2)
+    threads_panda = all_panda.groupby('conversationId').filter(lambda x: len(x) > 2)
 
     for index, row in threads_panda.iterrows():
 
         if row['inReplyToUser'] != None:
+            
             if str(row['inReplyToUser'])[20:] != str(row['username']):
+                replies.append(row)#FIXME: not sure if this works
                 threads_panda.drop(index, inplace=True)
-
+            
+            else:
+                thread_conv_ids.append(row['conversationId'])
+               
+        
+                
     #filtering another time to weed out replies
-    threads_panda = threads_panda.groupby('conversationId').filter(lambda x: len(x) > 2) #think about output file grouping?
-
+    threads_panda = threads_panda.groupby('conversationId').filter(lambda x: len(x) > 2) #TODO: think about output file grouping? maybe toplevel thread tweet -> where conversationId = id
     
-    threads_panda.to_csv(output_filepath + "test-threads@" + user.lower() + '-' + str(num_of_tweets) + '-' + type_of_scrape + '.csv', sep=',', index = False, encoding='utf-8') #FIXME: encoding doesn't work
-     #------------------------------------------------------------------------------------------------------------
+    #FIXME: not sure if this works
+    replies_panda = pd.DataFrame(replies, columns=['username', 'content', 'likes', 'retweets', 'replies', 'id', 'conversationId', 'inReplyToUser', 'date'])
 
-    if tweets_panda.empty:
-            window['-STATUS-'].update('No ' + type_of_scrape + ' found', text_color='red')
-    else:
-        
-        if values['-MULTIPLE-']:
-             window['-STATUS-'].update('Success! Scraped tweets, threads and replies from @' + user, text_color='green')
+    #FIXME: not sure if this works
+    tweets_panda = all_panda.groupby('id').filter(lambda x: len(x) < 2)
 
-        else:
-            window['-STATUS-'].update('Success! Scraped ' + str(len(tweets_panda)) + ' ' + type_of_scrape +' from @' + user, text_color='green')
-        
-        tweets_panda.to_csv(output_filepath + "@" + user.lower() + '-' + str(num_of_tweets) + '-' + type_of_scrape + '.csv', sep=',', index = False, encoding='utf-8') #FIXME: encoding doesn't work
-        window['progressBar'].update(100)
+    for index, row in tweets_panda.iterrows():
+
+        if row['inReplyToUser'] != None:
+            tweets_panda.drop(index, inplace=True)
+
+        elif row['conversationId'] in thread_conv_ids:
+            tweets_panda.drop(index, inplace=True)
+
+    #GUI LOGIC
+    if values['-THREADS-']:
+        threads_panda.to_csv(output_filepath + "@" + user.lower() + '-' + str(len(threads_panda)) + '-' + 'threads' + '.csv', sep=',', index = False, encoding='utf-8') #FIXME: encoding doesn't work
+        window['-STATUS-'].update('Success! Scraped ' + str(len(threads_panda)) + ' ' + 'threads' +' from @' + user, text_color='green')
+
+    elif values['-TWEETS-']:#FIXME: not sure if this works
+        tweets_panda.to_csv(output_filepath + "@" + user.lower() + '-' + str(len(tweets_panda)) + '-' + 'tweets' + '.csv', sep=',', index = False, encoding='utf-8')
+        window['-STATUS-'].update('Success! Scraped ' + str(len(tweets_panda)) + ' ' + 'tweets' +' from @' + user, text_color='green')
+    
+    elif values['-REPLIES-']:#FIXME: not sure if this works
+        replies_panda.to_csv(output_filepath + "@" + user.lower() + '-' + str(len(replies_panda)) + '-' + 'replies' + '.csv', sep=',', index = False, encoding='utf-8')
+        window['-STATUS-'].update('Success! Scraped ' + str(len(replies_panda)) + ' ' + 'replies' +' from @' + user, text_color='green')
+
+    elif values['-ALL-']:
+        all_panda.to_csv(output_filepath + "@" + user.lower() + '-' + str(len(all_panda)) + '-' + 'all' + '.csv', sep=',', index = False, encoding='utf-8')
+        window['-STATUS-'].update('Success! Scraped ' +  str(len(all_panda)) + ' tweets, threads and replies from @' + user, text_color='green')
+
+    window['progressBar'].update(100)
 
 
 def scrape_tweets(user, num_of_tweets):
@@ -90,32 +112,12 @@ def scrape_tweets(user, num_of_tweets):
 
 
             tweets.append([tweet.user.username, tweet.content, tweet.likeCount, tweet.retweetCount, tweet.replyCount, tweet.id, tweet.conversationId, tweet.inReplyToUser, tweet.date])
-        
-        #TODO: remove this and implement in create_csv or refactored function
-        if values['-THREADS-']:
-                type_of_scrape = 'threads'
-                create_csv(tweets, user, num_of_tweets, type_of_scrape)
-        
-        elif values['-TWEETS-']:
-                type_of_scrape = 'tweets'
-                create_csv(tweets, user, num_of_tweets, type_of_scrape)
-        
-        elif values['-REPLIES-']:
-                type_of_scrape = 'replies'
-                create_csv(tweets, user, num_of_tweets, type_of_scrape)
-        
-        elif values['-TNR-']:
-                type_of_scrape = 'tweets+replies'
-                create_csv(all, user, num_of_tweets, type_of_scrape)
-
-        elif values['-MULTIPLE-']:
-            create_csv(tweets, user, num_of_tweets, 'threads')
-            create_csv(tweets, user, num_of_tweets, 'tweets')
-            create_csv(tweets, user, num_of_tweets, 'replies')
-            create_csv(tweets, user, num_of_tweets, 'tweets+replies')
+            
+        create_csv(tweets, user)
 
     except Exception as e:
         window['-STATUS-'].update(e, text_color='red') #TODO: add information on token error
+
     
      
 while True:                      
