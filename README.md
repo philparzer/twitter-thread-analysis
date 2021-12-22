@@ -10,7 +10,7 @@ This repo will be used to gather and possible also visualize data for a research
 
 ## FUTURE TODOs:
 
-- [ ] do something about [second CAVEAT](#real-cool-heading)
+- [ ] do something about second CAVEAT
 - [ ] implement visualization / plots
 - [ ] expose output tweet properties in GUI
 - [ ] expose visualization / plotting option in GUI
