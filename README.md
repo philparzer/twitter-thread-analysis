@@ -2,18 +2,19 @@
 
 This repo will be used to gather and possible also visualize data for a research paper. The paper looks into variations in user engagement between threads and singular tweets. It's aim is to highlight possible benefits of using Twitter threads for science communication.
 
-## TODOs:
+## TODOs
 
 - [x] add Tweet / Thread / Both mechanic
 - [x] improve UX and add status messages
+- [ ] expose output tweet properties in GUI
+- [ ] add cancel scrape button
 - [ ] compile
 
-## FUTURE TODOs:
+## POSSIBLE UPDATES
 
-- [ ] do something about second CAVEAT
 - [ ] implement visualization / plots
-- [ ] expose output tweet properties in GUI
-- [ ] expose visualization / plotting option in GUI
+- [ ] do something about second caveat
+- [ ] change GUI theme on mac
 
 ## IMPORTANT CAVEATS
 

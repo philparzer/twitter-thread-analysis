@@ -1,10 +1,11 @@
 import pandas as pd
 import math
-import snscrape.modules.twitter as sntwitter #pip install git+https://github.com/JustAnotherArchivist/snscrape.git | #https://github.com/JustAnotherArchivist/snscrape/blob/master/snscrape/modules/twitter.py -> for tweet[options]
+import snscrape.modules.twitter as sntwitter
 import PySimpleGUI as gui
 import webbrowser
 
-gui.theme('systemdefault')
+gui.theme('systemdefault') 
+#TODO: change theme and text color based on OS
 
 output_filepath = './'
 start_button_disabled = False
@@ -17,11 +18,12 @@ layout = [
             [gui.Button('Start')],
             [gui.Text('Status', key='-STATUS-', pad=((5,0),(10,0)))],
             [gui.ProgressBar(max_value=100, orientation='h', key='progressBar', size=(40, 17))],
-            [gui.Text('Repo', enable_events=True, text_color='blue', tooltip="link to Github repo", pad=((5,0),(15,0)))],
-            [gui.Text('Creator', enable_events=True, text_color='blue', tooltip="link to creator's website", pad=((5,0),(5,5)))]
+            [gui.Text('Repo', enable_events=True, text_color='dark violet', tooltip="link to Github repo", pad=((5,0),(15,0)))],
+            [gui.Text('Creator', enable_events=True, text_color='dark violet', tooltip="link to creator's website", pad=((5,0),(5,5)))]
         ]      
  
-window = gui.Window('Twitter Thread Scraper', layout)
+window = gui.Window('Twitter Thread Scraper', layout, icon='threads_logo.ico')
+
 
 
 def toggle_start_button():
@@ -157,6 +159,8 @@ while True:
     if event == 'Creator':
         webbrowser.open('https://philippparzer.com/')
 
+    #TODO: add cancel event and button
+
     if event == 'Start':
         
         if values['-OUTPUT_FILEPATH-'] == 'current directory':
@@ -189,4 +193,4 @@ while True:
 
 
 window.close()
-quit()
+quit() #FIXME: when compiled
