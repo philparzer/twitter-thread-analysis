@@ -1,4 +1,6 @@
-# 🧵 twitter-thread-analysis
+
+
+# <img src="https://raw.githubusercontent.com/philparzer/twitter-thread-analysis/main/assets/threads_logo.png" width=6%></img> twitter-thread-analysis
 
 This repo will be used to gather and possible also visualize data for a research paper. The paper looks into variations in user engagement between threads and singular tweets. It's aim is to highlight possible benefits of using Twitter threads for science communication.
 
